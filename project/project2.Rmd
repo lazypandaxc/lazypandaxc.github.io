@@ -1,0 +1,256 @@
+---
+title: "Students' Test Scores Analysis"
+author: "Hang Dang"
+date: "5/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+class_diag<-function(probs,truth){
+  
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+```
+
+## INTRODUCTION
+*In the fall, I will be pursuing a master's in social work, and one of the main aspects in the field is looking at inequalities that are prevelant in society today. Decades of research have been done to understand the research inequality that prevails our country today. This dataset looks at a student's test performance. The categorical variables include a student's gender ('gender') and whether or not they had completed a test preparation course ('test preparation score') which will be indicated by 'completed', or 'not completed'. The numeric variables include, 'math score, 'reading score' and 'writing score' which measures how well a student scored on these test sections. There are a total of 189 observations for each of the variables.*
+
+```{r}
+library(tidyverse)
+
+#Loading our dataset into R studio 
+student <- read_csv("StudentsPerformance.csv")
+
+#Selecting the main variables to focus on
+student <- student %>% select(gender, `test preparation course`, `math score`, `reading score`, `writing score`)
+
+#Renaming the variables 
+names(student)[names(student) == "test preparation course"] <- "test"
+names(student)[names(student) == "math score"] <- "math"
+names(student)[names(student) == "reading score"] <- "reading"
+names(student)[names(student) == "writing score"] <- "writing"
+
+#Set the variable 'gender' as a binary variable. 
+student1 <- student %>% mutate(y=ifelse(gender=="female",1,0))
+student1$gender <- factor(student1$gender,levels=c("female", "male"))
+
+```
+
+
+## MANOVA TESTING
+*A MANOVA test was conducted in order to see if math, reading and writing scores show a mean difference across gender. The null hypothesis will suggest that all the means of the three groups (math, reading, writing) are equal, whereas the alternative hypothesis suggests that at least one of these three groups' mean will differ. We find the p-value is significant (2.2e-16) and say that one of the response variables differ. A univariate ANOVA was conducted and suggests that all three resopnse variables are significant. Post-hoc tests were conducted and in total, 116 tests were conducted, which included 1 MANOVA test, 3 ANOVA tests, and 112 t-tests. The probability of at least one type I error is 0.996 and after adjusting it (bonferroni correction) it is now 0.00043. Most likely the MANOVA assumptions were not met because this data was most likely not randomly collected.*
+```{r}
+#A MANOVA test was conducted to determine if math, reading and writing scores show a mean difference across gender. 
+man1 <- manova(cbind(math, reading, writing)~test, data=student)
+summary(man1)
+
+#Univariate ANOVAs tests were ran due to the significance of the MANOVA test
+summary.aov(man1)
+
+#Post-hoc tests was conducted 
+pairwise.t.test(student$math, student$test, p.adj="none")
+
+pairwise.t.test(student$reading, student$test, p.adj="none")
+
+pairwise.t.test(student$writing, student$test, p.adj="none")
+
+#Calculating the probability of atleast one type I error
+Type1ErrorCount <- replicate(5000,{
+  pvals<-NULL
+    for(i in 1:112){
+      samp1 <- rnorm(20, mean=0)
+      samp2 <- rnorm(20, mean=0)
+      pvals[i] <- t.test(samp1, samp2, var.eq=T)$p.val
+    }
+  sum(pvals<.05)
+})
+mean(Type1ErrorCount>0)
+
+#Adjusting the signficance level
+0.05/116
+```
+
+## RANDOMIZATION TEST
+*A two-sample t-test was conducted in order to see if there was a mean difference in math scores between gender (male and female). The null hypothesis is that the math score difference between gender is a value of 0. The alternative hypothesis is that there is a difference in math score between gender other than 0. The test was conducted, and we found that there is a signficance in the results because the p-value is 8.24e-08. This means that the null hypothesis is rejected and that there is a difference in scores between genders.*
+
+```{r}
+#A randomization test was conducted to find the mean difference
+t.test(data=student1, math ~ y)
+
+#A plot was created to visualize the results
+ggplot(student1, aes(math,fill=y)) + geom_histogram(bins=4) + facet_wrap(~y) + theme(legend.position="none")
+
+```
+
+## LINEAR REGRESSION MODEL
+*The predicted reading score of a female student with a math score of 0 is predicted to be at a value of 5.51. The score of male students with a math score of 0 is predicted to score 11.48 less than female students with a math score of 0.*
+
+*The proportion of the variation in the outcome is explained by the model of a value of 0.8184. When checking the assumptions of linearity, normality and homoskedasticity, we find that the assumptions seem to be good and passes. This is because the residuals look normally scattered and distributed. Whereas, looking at normality with the histogram, there seems to be a normal distribution. When recomputing the regression results with robust standard errors via coeftest, we find that there is an increase of standard error resulting in a larger p-value and smaller t-statistic.*
+```{r}
+student1$reading_c <- student1$reading - mean(student1$reading)
+student1$math_c <- student1$math - mean(student1$math)
+fit <- lm(reading_c~gender*math_c, data=student1)
+summary(fit)
+
+#A regression plot was created to visualize the interaction
+ggplot(student1, aes(reading_c, math_c, color=gender)) +geom_smooth(methods="lm")
+
+#Linearity and homoskedasticity was checked
+resid <-fit$residuals; fitvals<-fit$fitted.values
+ggplot() + geom_point(aes(fitvals,resid)) + geom_hline(yintercept=0, col="red")
+
+#Normality was checked
+ggplot() + geom_histogram(aes(resid), bins=25)
+
+#Looked at uncorrected SEs
+library(sandwich); library(lmtest)
+summary(fit)$coef[,1:2]
+
+#Looked at corrected SEs
+coeftest(fit, vcov=vcovHC(fit))[,1:2]
+```
+
+
+
+## LINEAR REGRESSION MODEL WITH BOOT STRAP ERRORS
+*Unforunately, I was not able to knit the results due to an error when knitting, so the code had to be deleted, but my standard error did change in comparison to the original and robust standard errors. Sorry about this.*
+
+```{r}
+fit <- lm(reading_c~gender*math_c, data=student1)
+res1 <- fit$residuals
+fittedvalues <- fit$fitted.values
+
+```
+
+## LOGISTIC REGRESSION MODEL PREDICTING A BINARY VARIABLE
+*By controlling for the student's writing score, for every 1 point increase in a student's reading score, the odds of it being male or female change by a factor of -0.074317. By controlling the reading score, for every 1 point increase in a student's writing score, the odds of it being male or female change by a factor of 0.112474.*
+
+*Looking at the accuracy value of 0.823 helps us to determine the proportion of correctly classified outcomes of students. The TPR value (the true positive rate) is 0.8170478, which is the proportion of male students correctly classified. The TNR value (true negative rate) is 0.8285164 is the probability of female students correctly classified. The PPV (the positive predicted value) is the proportion of classified males who actually are males. The AUC value is .9096189, which can be considered great. After generating a ROC curve/plot, the AUC comes out to be at a value of .9096189, which the value is considered great.* 
+
+```{r}
+library(plotROC)
+
+#A logistic regression model
+  fit1 <- glm(y~reading_c+math_c, data=student1, family="binomial")
+coeftest(fit1)
+
+#Created a confusion matrix
+prob <- predict(fit1, type="response")
+table(predict=as.numeric(prob>.5), truth=student1$y)%>%addmargins
+
+#Accuracy
+((393+430)/1000)
+
+#TPR
+393/481
+
+#TNR
+430/519
+
+#PPV
+393/482
+
+#AUC
+class_diag(prob, student1$y)
+
+#A density plot was created to visualize the results
+student1$logit <- predict(fit1,type = "link")
+student1 %>% mutate(y=as.factor(y)) %>% ggplot(aes(logit, color=y, fill=y)) +geom_density(alpha=.5) + geom_vline(xintercept=0) + xlab("predictor(logit)")
+
+#An ROC curve was created to visualize
+ROC <-ggplot(student1)+ geom_roc(aes(d=y, m=prob), n.cuts=0)
+ROC
+
+#AUC was calculated
+calc_auc(ROC)
+```
+
+## LOGISTIC REGRESSION WITH ALL VARIABLES
+*Looking at the accuracy value of 0.664 helps us to determine the proportion of correctly classified outcomes of students. The TPR value (the true positive rate) is 0.8301158, which is the proportion of male students correctly classified. The TNR value (true negative rate) is 0.8153527 is the probability of female students correctly classified. The PPV (the positive predicted value) is the proportion of classified males who actually are males. The AUC value is 0.9096189, which can be considered great. After generating a ROC curve/plot, the AUC comes out to be at a value of 0.9096189, which the value is considered great.* 
+*When calculating the out-of-sample classification, the AUC came out to be at a value of 0.9601502, which is higher than the in-sample calculation, and is considered to be great. After conducting a LASSO, the 'test', 'math', 'reading' and 'writing' variables were retained. After conducting a 10-fold CV using the variables lasso selected, the model's out-of-sample AUC is 0.9160367, which in comparison is about the same value to the logistic regression's AUC value of 0.9096189.*
+```{r}
+student2 <- student1 %>%select(test, math, reading, writing, y)
+
+#A logistic regression model was created
+fit2 <- glm(y~., data=student2, family="binomial")
+coeftest(fit2)
+
+prob1 <- predict(fit2, type="response")
+
+#Computing in-sample classification diagnostics
+class_diag(prob,student2$y)
+
+#A 10-fold CV was performed
+set.seed(1234)
+k=10
+
+data<-student2[sample(nrow(student2)),]
+fold<-cut(seq(1:nrow(student2)), breaks=k, labels=FALSE)
+
+diags<-NULL
+for(i in 1:k){
+  train<-data[fold!=i,]
+  tests<-data[fold==i,]
+  truth<-tests$y
+  fit<-glm(y~., data=student2,family="binomial")
+  probp<-predict(fit,newdata=tests, type="response")
+  diags<-rbind(diags,class_diag(probp,truth))
+}
+#Computing out-of-sample classification diagnostics
+summarize_all(diags,mean)
+
+#Grab Response/Predictor
+library(glmnet)
+y<-as.matrix(student2$y) 
+x<-model.matrix(y~., data=student2)[,-1] 
+head(x)
+
+cvs <-cv.glmnet(x, y, family="binomial")
+
+#Lasso was conducted
+lassos <-glmnet(x, y, family="binomial", lambda=cvs$lambda.1se)
+coef(lassos)
+
+#A 10-fold CV test was conducted on LASSO
+set.seed(1234) 
+k=10
+
+data<-student2%>%sample_frac
+fold1<-ntile(1:nrow(data),n=10)
+
+diags<-NULL
+for(i in 1:k){
+  train<-data[fold1!=i,]
+  test<-data[fold1==i,]
+  truth<-test$y
+  fit<-glm(y~test+math+reading,
+           data=train, family="binomial")
+  prob1<-predict(fit, newdata=test, type="response")
+  diags<-rbind(diags,class_diag(prob1,truth))
+}
+diags%>%summarize_all(mean)
+
+```
+

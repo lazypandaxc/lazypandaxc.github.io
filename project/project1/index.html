@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Monica Dang" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project 1: Happiness Analysis</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project1/">Project 1: Happiness Analysis</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p><em>My two datasets include the World Happiness Report data and the income of different countries in the year of 2019 for my project. The World Happiness Report dataset originally included the overall rank, country or region, score (of happiness), GDP per capita, social support, healthy life expectancy, freedom to make life choices, generosity, and perception of corruption as its variables. I wanted to focus on less variables, so I ommited the ‘Overall rank’, ‘Social support’, ‘Freedom to make life choices’, ‘Generosity’, and ‘Perception of corruption’ variables of the World Happiness Report dataset using the select function in R. For the second dataset, the variables originally included the country and the income from the years of 1800 to 2040. I used to the select function in R to narrow the dataset to the country and the year 2019 as the variables.</em></p>
+<p><em>These two datasets were acquired from Kaggle and Gapminder respectively. I chose these datasets because I am currently taking a Sociology course at the University of Texas called, “Society, Health and Happiness”. The World Happiness Report was mentioned in class, and I found it interesting to see which countries were considered to be the happiest in the globe. A possible association that can arise in this project is the more income that an individual has, the more likely that is to contribute to the country’s overall happiness score.</em></p>
+<p>Finding &amp; Importing Data</p>
+<pre class="r"><code># Tidyverse was loaded onto the R server.
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✓ ggplot2 3.3.3     ✓ purrr   0.3.4
+## ✓ tibble  3.0.4     ✓ dplyr   1.0.2
+## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
+## ✓ readr   1.4.0     ✓ forcats 0.5.0</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>happinessdata &lt;- read_csv(&quot;happinessdata2019.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   `Overall rank` = col_double(),
+##   `Country or region` = col_character(),
+##   Score = col_double(),
+##   `GDP per capita` = col_double(),
+##   `Social support` = col_double(),
+##   `Healthy life expectancy` = col_double(),
+##   `Freedom to make life choices` = col_double(),
+##   Generosity = col_double(),
+##   `Perceptions of corruption` = col_double()
+## )</code></pre>
+<pre class="r"><code># The first data set, the World Happiness Report was imported into R. Five variables from this dataset was removed to narrow the focus on less variables later on.
+happinessdata1 &lt;- happinessdata %&gt;% select(-`Overall rank`, -`Social support`, -`Freedom to make life choices`, -Generosity, -`Perceptions of corruption`) 
+names(happinessdata1)[names(happinessdata1) == &quot;Country or region&quot;] &lt;- &quot;country&quot;
+names(happinessdata1)[names(happinessdata1) == &quot;Healthy life expectancy&quot;] &lt;- &quot;healthylifeexpectancy&quot;
+names(happinessdata1)[names(happinessdata1) == &quot;GDP per capita&quot;] &lt;- &quot;gdp&quot;
+happinessdata1</code></pre>
+<pre><code>## # A tibble: 156 x 4
+##    country     Score   gdp healthylifeexpectancy
+##    &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;                 &lt;dbl&gt;
+##  1 Finland      7.77  1.34                 0.986
+##  2 Denmark      7.6   1.38                 0.996
+##  3 Norway       7.55  1.49                 1.03 
+##  4 Iceland      7.49  1.38                 1.03 
+##  5 Netherlands  7.49  1.40                 0.999
+##  6 Switzerland  7.48  1.45                 1.05 
+##  7 Sweden       7.34  1.39                 1.01 
+##  8 New Zealand  7.31  1.30                 1.03 
+##  9 Canada       7.28  1.36                 1.04 
+## 10 Austria      7.25  1.38                 1.02 
+## # … with 146 more rows</code></pre>
+<pre class="r"><code># The same was done to the second data set. The Income dataset from 2019 was imported and the variable/year, &quot;2019&quot; was selected to match with the first dataset.
+incomedata &lt;- read_csv(&quot;income_per_person2019.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   .default = col_double(),
+##   country = col_character()
+## )
+## ℹ Use `spec()` for the full column specifications.</code></pre>
+<pre class="r"><code>incomedata1 &lt;- incomedata %&gt;% select(country, &#39;2019&#39;)
+names(incomedata1)[names(incomedata1) == &quot;2019&quot;] &lt;- &quot;Income&quot;
+incomedata1</code></pre>
+<pre><code>## # A tibble: 193 x 2
+##    country             Income
+##    &lt;chr&gt;                &lt;dbl&gt;
+##  1 Afghanistan           1760
+##  2 Albania              12700
+##  3 Algeria              14000
+##  4 Andorra              53200
+##  5 Angola                5540
+##  6 Antigua and Barbuda  24500
+##  7 Argentina            17500
+##  8 Armenia               9730
+##  9 Australia            45500
+## 10 Austria              46900
+## # … with 183 more rows</code></pre>
+<div id="tidying-rearranging-widelong" class="section level4">
+<h4>Tidying: Rearranging Wide/Long</h4>
+<p><em>What I did here was untidy the two datasets first. I started with the World Happiness Report dataset and used the pivot_wider function. By assigning names_from to the variable “country” and values_from to the variable “Score”, the data now has 158 columns instead of rows. We then tidied the data using the pivot_longer function. The same was done with the second dataset, however we assigned names_from and values_from both the variables “country” and “Income” respectively. We then tidied the dataset by using the pivot_longer function.</em></p>
+<pre class="r"><code># The Happiness Report dataset was first untidied using the pivot_wider function. 
+mergeddata.hap.tidy &lt;- happinessdata1 %&gt;% pivot_wider(names_from = &quot;country&quot;, values_from = &quot;Score&quot;)
+head(mergeddata.hap.tidy)</code></pre>
+<pre><code>## # A tibble: 6 x 158
+##     gdp healthylifeexpe… Finland Denmark Norway Iceland Netherlands Switzerland
+##   &lt;dbl&gt;            &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+## 1  1.34            0.986    7.77    NA    NA      NA          NA          NA   
+## 2  1.38            0.996   NA        7.6  NA      NA          NA          NA   
+## 3  1.49            1.03    NA       NA     7.55   NA          NA          NA   
+## 4  1.38            1.03    NA       NA    NA       7.49       NA          NA   
+## 5  1.40            0.999   NA       NA    NA      NA           7.49       NA   
+## 6  1.45            1.05    NA       NA    NA      NA          NA           7.48
+## # … with 150 more variables: Sweden &lt;dbl&gt;, `New Zealand` &lt;dbl&gt;, Canada &lt;dbl&gt;,
+## #   Austria &lt;dbl&gt;, Australia &lt;dbl&gt;, `Costa Rica` &lt;dbl&gt;, Israel &lt;dbl&gt;,
+## #   Luxembourg &lt;dbl&gt;, `United Kingdom` &lt;dbl&gt;, Ireland &lt;dbl&gt;, Germany &lt;dbl&gt;,
+## #   Belgium &lt;dbl&gt;, `United States` &lt;dbl&gt;, `Czech Republic` &lt;dbl&gt;, `United Arab
+## #   Emirates` &lt;dbl&gt;, Malta &lt;dbl&gt;, Mexico &lt;dbl&gt;, France &lt;dbl&gt;, Taiwan &lt;dbl&gt;,
+## #   Chile &lt;dbl&gt;, Guatemala &lt;dbl&gt;, `Saudi Arabia` &lt;dbl&gt;, Qatar &lt;dbl&gt;,
+## #   Spain &lt;dbl&gt;, Panama &lt;dbl&gt;, Brazil &lt;dbl&gt;, Uruguay &lt;dbl&gt;, Singapore &lt;dbl&gt;,
+## #   `El Salvador` &lt;dbl&gt;, Italy &lt;dbl&gt;, Bahrain &lt;dbl&gt;, Slovakia &lt;dbl&gt;, `Trinidad
+## #   &amp; Tobago` &lt;dbl&gt;, Poland &lt;dbl&gt;, Uzbekistan &lt;dbl&gt;, Lithuania &lt;dbl&gt;,
+## #   Colombia &lt;dbl&gt;, Slovenia &lt;dbl&gt;, Nicaragua &lt;dbl&gt;, Kosovo &lt;dbl&gt;,
+## #   Argentina &lt;dbl&gt;, Romania &lt;dbl&gt;, Cyprus &lt;dbl&gt;, Ecuador &lt;dbl&gt;, Kuwait &lt;dbl&gt;,
+## #   Thailand &lt;dbl&gt;, Latvia &lt;dbl&gt;, `South Korea` &lt;dbl&gt;, Estonia &lt;dbl&gt;,
+## #   Jamaica &lt;dbl&gt;, Mauritius &lt;dbl&gt;, Japan &lt;dbl&gt;, Honduras &lt;dbl&gt;,
+## #   Kazakhstan &lt;dbl&gt;, Bolivia &lt;dbl&gt;, Hungary &lt;dbl&gt;, Paraguay &lt;dbl&gt;, `Northern
+## #   Cyprus` &lt;dbl&gt;, Peru &lt;dbl&gt;, Portugal &lt;dbl&gt;, Pakistan &lt;dbl&gt;, Russia &lt;dbl&gt;,
+## #   Philippines &lt;dbl&gt;, Serbia &lt;dbl&gt;, Moldova &lt;dbl&gt;, Libya &lt;dbl&gt;,
+## #   Montenegro &lt;dbl&gt;, Tajikistan &lt;dbl&gt;, Croatia &lt;dbl&gt;, `Hong Kong` &lt;dbl&gt;,
+## #   `Dominican Republic` &lt;dbl&gt;, `Bosnia and Herzegovina` &lt;dbl&gt;, Turkey &lt;dbl&gt;,
+## #   Malaysia &lt;dbl&gt;, Belarus &lt;dbl&gt;, Greece &lt;dbl&gt;, Mongolia &lt;dbl&gt;, `North
+## #   Macedonia` &lt;dbl&gt;, Nigeria &lt;dbl&gt;, Kyrgyzstan &lt;dbl&gt;, Turkmenistan &lt;dbl&gt;,
+## #   Algeria &lt;dbl&gt;, Morocco &lt;dbl&gt;, Azerbaijan &lt;dbl&gt;, Lebanon &lt;dbl&gt;,
+## #   Indonesia &lt;dbl&gt;, China &lt;dbl&gt;, Vietnam &lt;dbl&gt;, Bhutan &lt;dbl&gt;, Cameroon &lt;dbl&gt;,
+## #   Bulgaria &lt;dbl&gt;, Ghana &lt;dbl&gt;, `Ivory Coast` &lt;dbl&gt;, Nepal &lt;dbl&gt;,
+## #   Jordan &lt;dbl&gt;, Benin &lt;dbl&gt;, `Congo (Brazzaville)` &lt;dbl&gt;, Gabon &lt;dbl&gt;,
+## #   Laos &lt;dbl&gt;, `South Africa` &lt;dbl&gt;, …</code></pre>
+<pre class="r"><code># The Happiness Report dataset was next tidied using the pivot_longer function. 
+mergeddata.hap.tidy2 &lt;- mergeddata.hap.tidy %&gt;% pivot_longer(!gdp &amp; !healthylifeexpectancy, names_to = &quot;country&quot;, values_to = &quot;Score&quot;, values_drop_na = T)
+mergeddata.hap.tidy2 &lt;- mergeddata.hap.tidy2[c(&quot;country&quot;, &quot;Score&quot;, &quot;gdp&quot;, &quot;healthylifeexpectancy&quot;)]
+head(mergeddata.hap.tidy2)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##   country     Score   gdp healthylifeexpectancy
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;                 &lt;dbl&gt;
+## 1 Finland      7.77  1.34                 0.986
+## 2 Denmark      7.6   1.38                 0.996
+## 3 Norway       7.55  1.49                 1.03 
+## 4 Iceland      7.49  1.38                 1.03 
+## 5 Netherlands  7.49  1.40                 0.999
+## 6 Switzerland  7.48  1.45                 1.05</code></pre>
+<pre class="r"><code># The Income dataset was first untidied using the pivot_wider function. 
+mergeddata.in.tidy &lt;-  incomedata1 %&gt;% pivot_wider(names_from = &quot;country&quot;, values_from = &quot;Income&quot;)
+head(mergeddata.in.tidy)</code></pre>
+<pre><code>## # A tibble: 1 x 193
+##   Afghanistan Albania Algeria Andorra Angola `Antigua and Ba… Argentina Armenia
+##         &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;            &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+## 1        1760   12700   14000   53200   5540            24500     17500    9730
+## # … with 185 more variables: Australia &lt;dbl&gt;, Austria &lt;dbl&gt;, Azerbaijan &lt;dbl&gt;,
+## #   Bahamas &lt;dbl&gt;, Bahrain &lt;dbl&gt;, Bangladesh &lt;dbl&gt;, Barbados &lt;dbl&gt;,
+## #   Belarus &lt;dbl&gt;, Belgium &lt;dbl&gt;, Belize &lt;dbl&gt;, Benin &lt;dbl&gt;, Bhutan &lt;dbl&gt;,
+## #   Bolivia &lt;dbl&gt;, `Bosnia and Herzegovina` &lt;dbl&gt;, Botswana &lt;dbl&gt;,
+## #   Brazil &lt;dbl&gt;, Brunei &lt;dbl&gt;, Bulgaria &lt;dbl&gt;, `Burkina Faso` &lt;dbl&gt;,
+## #   Burundi &lt;dbl&gt;, Cambodia &lt;dbl&gt;, Cameroon &lt;dbl&gt;, Canada &lt;dbl&gt;, `Cape
+## #   Verde` &lt;dbl&gt;, `Central African Republic` &lt;dbl&gt;, Chad &lt;dbl&gt;, Chile &lt;dbl&gt;,
+## #   China &lt;dbl&gt;, Colombia &lt;dbl&gt;, Comoros &lt;dbl&gt;, `Congo, Dem. Rep.` &lt;dbl&gt;,
+## #   `Congo, Rep.` &lt;dbl&gt;, `Costa Rica` &lt;dbl&gt;, `Cote d&#39;Ivoire` &lt;dbl&gt;,
+## #   Croatia &lt;dbl&gt;, Cuba &lt;dbl&gt;, Cyprus &lt;dbl&gt;, `Czech Republic` &lt;dbl&gt;,
+## #   Denmark &lt;dbl&gt;, Djibouti &lt;dbl&gt;, Dominica &lt;dbl&gt;, `Dominican Republic` &lt;dbl&gt;,
+## #   Ecuador &lt;dbl&gt;, Egypt &lt;dbl&gt;, `El Salvador` &lt;dbl&gt;, `Equatorial Guinea` &lt;dbl&gt;,
+## #   Eritrea &lt;dbl&gt;, Estonia &lt;dbl&gt;, Eswatini &lt;dbl&gt;, Ethiopia &lt;dbl&gt;, Fiji &lt;dbl&gt;,
+## #   Finland &lt;dbl&gt;, France &lt;dbl&gt;, Gabon &lt;dbl&gt;, Gambia &lt;dbl&gt;, Georgia &lt;dbl&gt;,
+## #   Germany &lt;dbl&gt;, Ghana &lt;dbl&gt;, Greece &lt;dbl&gt;, Grenada &lt;dbl&gt;, Guatemala &lt;dbl&gt;,
+## #   Guinea &lt;dbl&gt;, `Guinea-Bissau` &lt;dbl&gt;, Guyana &lt;dbl&gt;, Haiti &lt;dbl&gt;,
+## #   Honduras &lt;dbl&gt;, Hungary &lt;dbl&gt;, Iceland &lt;dbl&gt;, India &lt;dbl&gt;, Indonesia &lt;dbl&gt;,
+## #   Iran &lt;dbl&gt;, Iraq &lt;dbl&gt;, Ireland &lt;dbl&gt;, Israel &lt;dbl&gt;, Italy &lt;dbl&gt;,
+## #   Jamaica &lt;dbl&gt;, Japan &lt;dbl&gt;, Jordan &lt;dbl&gt;, Kazakhstan &lt;dbl&gt;, Kenya &lt;dbl&gt;,
+## #   Kiribati &lt;dbl&gt;, Kuwait &lt;dbl&gt;, `Kyrgyz Republic` &lt;dbl&gt;, Lao &lt;dbl&gt;,
+## #   Latvia &lt;dbl&gt;, Lebanon &lt;dbl&gt;, Lesotho &lt;dbl&gt;, Liberia &lt;dbl&gt;, Libya &lt;dbl&gt;,
+## #   Lithuania &lt;dbl&gt;, Luxembourg &lt;dbl&gt;, Madagascar &lt;dbl&gt;, Malawi &lt;dbl&gt;,
+## #   Malaysia &lt;dbl&gt;, Maldives &lt;dbl&gt;, Mali &lt;dbl&gt;, Malta &lt;dbl&gt;, `Marshall
+## #   Islands` &lt;dbl&gt;, Mauritania &lt;dbl&gt;, Mauritius &lt;dbl&gt;, …</code></pre>
+<pre class="r"><code># The Income dataset was then tidied using the pivot_longer function. 
+mergeddata.in.tidy2 &lt;- mergeddata.in.tidy %&gt;% pivot_longer(cols = everything())
+head(mergeddata.in.tidy2)</code></pre>
+<pre><code>## # A tibble: 6 x 2
+##   name                value
+##   &lt;chr&gt;               &lt;dbl&gt;
+## 1 Afghanistan          1760
+## 2 Albania             12700
+## 3 Algeria             14000
+## 4 Andorra             53200
+## 5 Angola               5540
+## 6 Antigua and Barbuda 24500</code></pre>
+</div>
+<div id="joiningmerging-the-two-datasets" class="section level4">
+<h4>Joining/Merging the Two Datasets</h4>
+<p><em>The two datasets were merged using an inner join using the common variable ID “country” and “Country or region”. I decided to use an inner join because I wanted to match the same countries from the World Happiness Report dataset to the countries of the income dataset. The countries that existed in the income dataset that was not matched in the World Happiness Report dataset was dropped. There is assumed no problems with dropping these cases because they would not be helpful in looking at both of the datasets if it was not present in one or the other.</em></p>
+<pre class="r"><code># Dplyr was loaded onto the R server.
+library(dplyr)
+
+# An inner join was used to merge the two variables together. 
+mergeddata &lt;- happinessdata1 %&gt;% inner_join(incomedata1, by = &quot;country&quot;) 
+glimpse(mergeddata)</code></pre>
+<pre><code>## Rows: 143
+## Columns: 5
+## $ country               &lt;chr&gt; &quot;Finland&quot;, &quot;Denmark&quot;, &quot;Norway&quot;, &quot;Iceland&quot;, &quot;Net…
+## $ Score                 &lt;dbl&gt; 7.769, 7.600, 7.554, 7.494, 7.488, 7.480, 7.343…
+## $ gdp                   &lt;dbl&gt; 1.340, 1.383, 1.488, 1.380, 1.396, 1.452, 1.387…
+## $ healthylifeexpectancy &lt;dbl&gt; 0.986, 0.996, 1.028, 1.026, 0.999, 1.052, 1.009…
+## $ Income                &lt;dbl&gt; 42400, 48300, 66300, 47900, 50500, 59000, 47200…</code></pre>
+</div>
+<div id="wrangling" class="section level4">
+<h4>Wrangling</h4>
+<pre class="r"><code>library(dplyr)
+
+# The six core dplyr functions were used.
+mergeddata &lt;- mergeddata %&gt;% mutate(income_cat = ifelse(Income &gt; 75333.66, &quot;high&quot;, ifelse(Income&lt;=75333.66 &amp; 28250&lt;=Income, &quot;med&quot;, &quot;low&quot;)))
+mean(mergeddata$Score)</code></pre>
+<pre><code>## [1] 5.414573</code></pre>
+<pre class="r"><code>mergeddata %&gt;% select(country, Score, Income) %&gt;% filter(Score &gt;= 5.414573) %&gt;% arrange(desc(Score)) </code></pre>
+<pre><code>## # A tibble: 71 x 3
+##    country     Score Income
+##    &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;
+##  1 Finland      7.77  42400
+##  2 Denmark      7.6   48300
+##  3 Norway       7.55  66300
+##  4 Iceland      7.49  47900
+##  5 Netherlands  7.49  50500
+##  6 Switzerland  7.48  59000
+##  7 Sweden       7.34  47200
+##  8 New Zealand  7.31  36500
+##  9 Canada       7.28  44200
+## 10 Austria      7.25  46900
+## # … with 61 more rows</code></pre>
+<pre class="r"><code># Summary statistics were used for each of the numeric variables. 
+scoresummary &lt;- mergeddata %&gt;% summarize(mean_score=mean(Score, na.rm=T), med_score=median(Score, na.rm=T), sd_score=sd(Score, na.rm=T), min_score=min(Score, na.rm =T), max_score=max(Score, na.rm =T))
+scoresummary</code></pre>
+<pre><code>## # A tibble: 1 x 5
+##   mean_score med_score sd_score min_score max_score
+##        &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1       5.41      5.39     1.14      2.85      7.77</code></pre>
+<pre class="r"><code>incomesummary &lt;- mergeddata %&gt;% summarize(mean_income=mean(Income, na.rm=T), med_income=median(Income, na.rm=T), sd_income=sd(Income, na.rm=T), min_income=min(Income, na.rm =T), max_income=max(Income, na.rm =T))
+incomesummary</code></pre>
+<pre><code>## # A tibble: 1 x 5
+##   mean_income med_income sd_income min_income max_income
+##         &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+## 1      20047.      13100    20554.        631     113000</code></pre>
+<pre class="r"><code>gdpsummary &lt;- mergeddata %&gt;% summarize(mean_gdp = mean(gdp, na.rm=T), sd_gdp=sd(gdp, na.rm=T), min_gdp=min(gdp, na.rm =T), max_gdp=max(gdp, na.rm =T))
+gdpsummary</code></pre>
+<pre><code>## # A tibble: 1 x 4
+##   mean_gdp sd_gdp min_gdp max_gdp
+##      &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1    0.907  0.400       0    1.68</code></pre>
+<pre class="r"><code>lifeexpsummary &lt;- mergeddata %&gt;% summarize(mean_lifeexp=mean(healthylifeexpectancy, na.rm=T), med_lifeexp=median(healthylifeexpectancy, na.rm=T), sd_lifeexp=sd(healthylifeexpectancy, na.rm=T), min_lifeexp=min(Income, na.rm =T), max_lifeexp=max(healthylifeexpectancy, na.rm =T))
+lifeexpsummary</code></pre>
+<pre><code>## # A tibble: 1 x 5
+##   mean_lifeexp med_lifeexp sd_lifeexp min_lifeexp max_lifeexp
+##          &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+## 1        0.732       0.798      0.234         631        1.14</code></pre>
+<pre class="r"><code># The group_by function was used to create a summary statistics. 
+groupsummarydata1 &lt;- mergeddata %&gt;% group_by(income_cat) %&gt;% summarize(mean_gdp=mean(gdp, na.rm=T), sd_gdp=sd(gdp, na.rm=T), median_gdp=median(gdp, na.rm=T), max_gdp=max(gdp, na.rm=T), min_gdp=min(gdp, na.rm=T))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>groupsummarydata1</code></pre>
+<pre><code>## # A tibble: 3 x 6
+##   income_cat mean_gdp sd_gdp median_gdp max_gdp min_gdp
+##   &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1 high          1.62  0.0571       1.61    1.68    1.57
+## 2 low           0.736 0.329        0.81    1.19    0   
+## 3 med           1.34  0.0856       1.34    1.50    1.20</code></pre>
+<pre class="r"><code>groupsummarydata2 &lt;- mergeddata %&gt;% group_by(income_cat) %&gt;% summarize(mean_score=mean(Score, na.rm=T), sd_score=sd(Score, na.rm=T), median_score=median(Score, na.rm=T), max_score=max(Score, na.rm=T), min_score=min(Score, na.rm=T))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>groupsummarydata2</code></pre>
+<pre><code>## # A tibble: 3 x 6
+##   income_cat mean_score sd_score median_score max_score min_score
+##   &lt;chr&gt;           &lt;dbl&gt;    &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 high             6.58    0.449         6.37      7.09      6.26
+## 2 low              4.94    0.900         4.95      7.17      2.85
+## 3 med              6.69    0.657         6.84      7.77      5.34</code></pre>
+<p><em>The mutate function was first used to create a categorical variable. The income variable was categorized. I then decided to find the mean in order to select countries with a happiness score higher than the average, which was 5.414573. I then used the arrange function in order to arrange the countries by highest to lowest scores. Next, we created summary statistics for each of the numeric variable. The summary statistics were the mean, standard deviation, median, maximum and minimum. I found it interesting that the average income for all the countries is 20046.94, and average score was 5.414573. Lastly, the group_by function was used to create two summary statistics.</em></p>
+</div>
+<div id="visualizing" class="section level4">
+<h4>Visualizing</h4>
+<pre class="r"><code># A correlation heatmap of the data was created. 
+corheatmap &lt;- mergeddata %&gt;% select_if(is.numeric) %&gt;% cor(use= &quot;pair&quot;) %&gt;% as.data.frame %&gt;% rownames_to_column(&quot;var1&quot;) %&gt;% pivot_longer(-1, names_to=&quot;var2&quot;, values_to=&quot;correlation&quot;)
+
+corheatmap %&gt;% ggplot(aes(var1, var2, fill=correlation)) +  scale_fill_gradient2(low=&quot;yellow&quot;, mid = &quot;blue&quot;, high=&quot;pink&quot;) + geom_tile() + geom_text(aes(label=round(correlation, 1)), color=&quot;black&quot;, size=3) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + coord_fixed()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code># 2 ggplots were created. 
+ggplot(data=mergeddata, aes(x = Score, y =healthylifeexpectancy)) + geom_point(size = 4, aes(color=income_cat), stat = &quot;summary&quot;, fun = mean) + theme_minimal() +ggtitle(&quot;Score vs. Healthy life expectancy&quot;) + ylab(&quot;Healthy Life Expectancy&quot;) + xlab(&quot;Score&quot;) + scale_x_continuous(breaks=seq(0, 50, 5))</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<pre class="r"><code>secondplot &lt;- ggplot(data = mergeddata, aes(x = gdp, y = Score, color = income_cat, group = income_cat)) + geom_line() + theme(legend.position = &quot;none&quot;) + ggtitle(&quot;GDP per capita vs. Score by Income&quot;) + ylab(&quot;Score&quot;) + xlab(&quot;GDP per capita&quot;)
+secondplot + facet_wrap(~income_cat)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-5-3.png" width="672" /></p>
+<p><em>A correlation heatmap was created with all four numeric variables. Looking at the results, we can find that the correlations between the variables are quite strong. The highest correlations were between the healthy life expectancy and gdp with a correlation of 0.9. This correlation makes sense because a healthy life expectancy can be influenced by the increase in gross domestic product per capita income. The lowest correlation scores was 0.7 between different variable pairs (score and income, and score and healthy life expectancy).</em></p>
+<p><em>The first ggplot was created and examines the relationship between the happiness score and healthy life expectancy when grouped by the income categories. The ggplot shows that the two variables are positively correlated when grouped by income. As the healthy life expectancy increase, so does the happiness score.</em></p>
+<p><em>The second ggplot was created and examines the relationship between the GDP per capita and the score when grouped by categorical income. The plot shows that there is a lot of variation between the two variables which means it is possibly not correlated that well. On average, countries with lower income tend to have a lower happiness score and lower GDP per capita.</em></p>
+</div>
+<div id="dimensionality-reduction" class="section level4">
+<h4>Dimensionality Reduction</h4>
+<pre class="r"><code>library(cluster)
+# The number of clusters were determined. 
+data_cluster &lt;- mergeddata %&gt;% dplyr::select(Score, Income, healthylifeexpectancy, gdp)
+sil_width &lt;- vector()
+for (i in 2:10) {
+  kms &lt;- kmeans(data_cluster, centers = i)
+  silh &lt;- silhouette(kms$cluster, dist(data_cluster))
+  sil_width[i] &lt;- mean(silh[,3])
+}
+#A visualization of principal components is seen through the ggplot
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, breaks = 1:10)</code></pre>
+<pre><code>## Warning: Removed 1 row(s) containing missing values (geom_path).</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code># PAM was used to do a cluster analysis
+pam &lt;- mergeddata %&gt;% select(Score, Income, healthylifeexpectancy, gdp) %&gt;% scale %&gt;% pam(2)
+pam</code></pre>
+<pre><code>## Medoids:
+##       ID      Score     Income healthylifeexpectancy        gdp
+## [1,]  44  0.5738087  0.2652992             0.3977425  0.6384187
+## [2,] 123 -1.0729573 -0.8843352            -1.2346454 -1.4370104
+## Clustering vector:
+##   [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+##  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 1 1 1 1 1 1 2 1 1 1 1 1
+##  [75] 1 1 1 1 2 1 1 1 1 1 1 1 1 2 2 1 2 2 1 2 1 2 1 1 2 2 2 2 2 2 1 1 2 1 2 2 2
+## [112] 2 1 2 1 2 2 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+## Objective function:
+##    build     swap 
+## 1.240976 1.187136 
+## 
+## Available components:
+##  [1] &quot;medoids&quot;    &quot;id.med&quot;     &quot;clustering&quot; &quot;objective&quot;  &quot;isolation&quot; 
+##  [6] &quot;clusinfo&quot;   &quot;silinfo&quot;    &quot;diss&quot;       &quot;call&quot;       &quot;data&quot;</code></pre>
+<pre class="r"><code># Created the visualization of the cluster
+finalcluster &lt;- mergeddata %&gt;% select(Score, Income, healthylifeexpectancy, gdp) %&gt;% mutate(cluster = pam$clustering)
+ggplot(finalcluster, aes(x = Score, y = Income, color = cluster)) + geom_point()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
+<p><em>The number of clusters were first determined using the silhouette function. A cluster analysis was ran by using the PAM function. There were a total number of two clusters, however these clusters were based on all the numeric variables. The following visualization of the cluster shows that the two variables possible correlation.</em></p>
+<pre class="r"><code>knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = &quot;center&quot;, warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))</code></pre>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

@@ -1,0 +1,158 @@
+---
+title: "Project 1: Happiness Analysis"
+author: Hang Dang hbd297
+date: 3/28/31
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Introduction
+*My two datasets include the World Happiness Report data and the income of different countries in the year of 2019 for my project. The World Happiness Report dataset originally included the overall rank, country or region, score (of happiness), GDP per capita, social support, healthy life expectancy, freedom to make life choices, generosity, and perception of corruption as its variables. I wanted to focus on less variables, so I ommited the 'Overall rank', 'Social support', 'Freedom to make life choices', 'Generosity', and 'Perception of corruption' variables of the World Happiness Report dataset using the select function in R. For the second dataset, the variables originally included the country and the income from the years of 1800 to 2040. I used to the select function in R to narrow the dataset to the country and the year 2019 as the variables.*
+
+*These two datasets were acquired from Kaggle and Gapminder respectively. I chose these datasets because I am currently taking a Sociology course at the University of Texas called, "Society, Health and Happiness". The World Happiness Report was mentioned in class, and I found it interesting to see which countries were considered to be the happiest in the globe. A possible association that can arise in this project is the more income that an individual has, the more likely that is to contribute to the country's overall happiness score.*
+
+Finding & Importing Data
+
+```{r}
+# Tidyverse was loaded onto the R server.
+library(tidyverse)
+happinessdata <- read_csv("happinessdata2019.csv")
+
+# The first data set, the World Happiness Report was imported into R. Five variables from this dataset was removed to narrow the focus on less variables later on.
+happinessdata1 <- happinessdata %>% select(-`Overall rank`, -`Social support`, -`Freedom to make life choices`, -Generosity, -`Perceptions of corruption`) 
+names(happinessdata1)[names(happinessdata1) == "Country or region"] <- "country"
+names(happinessdata1)[names(happinessdata1) == "Healthy life expectancy"] <- "healthylifeexpectancy"
+names(happinessdata1)[names(happinessdata1) == "GDP per capita"] <- "gdp"
+happinessdata1
+
+# The same was done to the second data set. The Income dataset from 2019 was imported and the variable/year, "2019" was selected to match with the first dataset.
+incomedata <- read_csv("income_per_person2019.csv")
+incomedata1 <- incomedata %>% select(country, '2019')
+names(incomedata1)[names(incomedata1) == "2019"] <- "Income"
+incomedata1
+```
+
+
+#### Tidying: Rearranging Wide/Long
+*What I did here was untidy the two datasets first. I started with the World Happiness Report dataset and used the pivot_wider function. By assigning names_from to the variable "country" and values_from to the variable "Score", the data now has 158 columns instead of rows. We then tidied the data using the pivot_longer function. The same was done with the second dataset, however we assigned names_from and values_from both the variables "country" and "Income" respectively. We then tidied the dataset by using the pivot_longer function.*
+
+```{r}
+# The Happiness Report dataset was first untidied using the pivot_wider function. 
+mergeddata.hap.tidy <- happinessdata1 %>% pivot_wider(names_from = "country", values_from = "Score")
+head(mergeddata.hap.tidy)
+
+# The Happiness Report dataset was next tidied using the pivot_longer function. 
+mergeddata.hap.tidy2 <- mergeddata.hap.tidy %>% pivot_longer(!gdp & !healthylifeexpectancy, names_to = "country", values_to = "Score", values_drop_na = T)
+mergeddata.hap.tidy2 <- mergeddata.hap.tidy2[c("country", "Score", "gdp", "healthylifeexpectancy")]
+head(mergeddata.hap.tidy2)
+
+# The Income dataset was first untidied using the pivot_wider function. 
+mergeddata.in.tidy <-  incomedata1 %>% pivot_wider(names_from = "country", values_from = "Income")
+head(mergeddata.in.tidy)
+
+# The Income dataset was then tidied using the pivot_longer function. 
+mergeddata.in.tidy2 <- mergeddata.in.tidy %>% pivot_longer(cols = everything())
+head(mergeddata.in.tidy2)
+```
+
+
+#### Joining/Merging the Two Datasets
+*The two datasets were merged using an inner join using the common variable ID "country" and "Country or region". I decided to use an inner join because I wanted to match the same countries from the World Happiness Report dataset to the countries of the income dataset. The countries that existed in the income dataset that was not matched in the World Happiness Report dataset was dropped. There is assumed no problems with dropping these cases because they would not be helpful in looking at both of the datasets if it was not present in one or the other.* 
+
+```{r}
+# Dplyr was loaded onto the R server.
+library(dplyr)
+
+# An inner join was used to merge the two variables together. 
+mergeddata <- happinessdata1 %>% inner_join(incomedata1, by = "country") 
+glimpse(mergeddata)
+```
+
+#### Wrangling
+
+```{r}
+library(dplyr)
+
+# The six core dplyr functions were used.
+mergeddata <- mergeddata %>% mutate(income_cat = ifelse(Income > 75333.66, "high", ifelse(Income<=75333.66 & 28250<=Income, "med", "low")))
+mean(mergeddata$Score)
+mergeddata %>% select(country, Score, Income) %>% filter(Score >= 5.414573) %>% arrange(desc(Score)) 
+
+# Summary statistics were used for each of the numeric variables. 
+scoresummary <- mergeddata %>% summarize(mean_score=mean(Score, na.rm=T), med_score=median(Score, na.rm=T), sd_score=sd(Score, na.rm=T), min_score=min(Score, na.rm =T), max_score=max(Score, na.rm =T))
+scoresummary
+
+incomesummary <- mergeddata %>% summarize(mean_income=mean(Income, na.rm=T), med_income=median(Income, na.rm=T), sd_income=sd(Income, na.rm=T), min_income=min(Income, na.rm =T), max_income=max(Income, na.rm =T))
+incomesummary
+
+gdpsummary <- mergeddata %>% summarize(mean_gdp = mean(gdp, na.rm=T), sd_gdp=sd(gdp, na.rm=T), min_gdp=min(gdp, na.rm =T), max_gdp=max(gdp, na.rm =T))
+gdpsummary
+
+lifeexpsummary <- mergeddata %>% summarize(mean_lifeexp=mean(healthylifeexpectancy, na.rm=T), med_lifeexp=median(healthylifeexpectancy, na.rm=T), sd_lifeexp=sd(healthylifeexpectancy, na.rm=T), min_lifeexp=min(Income, na.rm =T), max_lifeexp=max(healthylifeexpectancy, na.rm =T))
+lifeexpsummary
+
+# The group_by function was used to create a summary statistics. 
+groupsummarydata1 <- mergeddata %>% group_by(income_cat) %>% summarize(mean_gdp=mean(gdp, na.rm=T), sd_gdp=sd(gdp, na.rm=T), median_gdp=median(gdp, na.rm=T), max_gdp=max(gdp, na.rm=T), min_gdp=min(gdp, na.rm=T))
+groupsummarydata1
+
+groupsummarydata2 <- mergeddata %>% group_by(income_cat) %>% summarize(mean_score=mean(Score, na.rm=T), sd_score=sd(Score, na.rm=T), median_score=median(Score, na.rm=T), max_score=max(Score, na.rm=T), min_score=min(Score, na.rm=T))
+groupsummarydata2
+```
+
+*The mutate function was first used to create a categorical variable. The income variable was categorized. I then decided to find the mean in order to select countries with a happiness score higher than the average, which was 5.414573. I then used the arrange function in order to arrange the countries by highest to lowest scores. Next, we created summary statistics for each of the numeric variable. The summary statistics were the mean, standard deviation, median, maximum and minimum. I found it interesting that the average income for all the countries is 20046.94, and average score was 5.414573. Lastly, the group_by function was used to create two summary statistics.*
+
+#### Visualizing 
+    
+```{r}
+# A correlation heatmap of the data was created. 
+corheatmap <- mergeddata %>% select_if(is.numeric) %>% cor(use= "pair") %>% as.data.frame %>% rownames_to_column("var1") %>% pivot_longer(-1, names_to="var2", values_to="correlation")
+
+corheatmap %>% ggplot(aes(var1, var2, fill=correlation)) +  scale_fill_gradient2(low="yellow", mid = "blue", high="pink") + geom_tile() + geom_text(aes(label=round(correlation, 1)), color="black", size=3) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + coord_fixed()
+
+# 2 ggplots were created. 
+ggplot(data=mergeddata, aes(x = Score, y =healthylifeexpectancy)) + geom_point(size = 4, aes(color=income_cat), stat = "summary", fun = mean) + theme_minimal() +ggtitle("Score vs. Healthy life expectancy") + ylab("Healthy Life Expectancy") + xlab("Score") + scale_x_continuous(breaks=seq(0, 50, 5))
+
+secondplot <- ggplot(data = mergeddata, aes(x = gdp, y = Score, color = income_cat, group = income_cat)) + geom_line() + theme(legend.position = "none") + ggtitle("GDP per capita vs. Score by Income") + ylab("Score") + xlab("GDP per capita")
+secondplot + facet_wrap(~income_cat)
+```
+
+
+
+*A correlation heatmap was created with all four numeric variables. Looking at the results, we can find that the correlations between the variables are quite strong. The highest correlations were between the healthy life expectancy and gdp with a correlation of 0.9. This correlation makes sense because a healthy life expectancy can be influenced by the increase in gross domestic product per capita income. The lowest correlation scores was 0.7 between different variable pairs (score and income, and score and healthy life expectancy).*
+
+*The first ggplot was created and examines the relationship between the happiness score and healthy life expectancy when grouped by the income categories. The ggplot shows that the two variables are positively correlated when grouped by income. As the healthy life expectancy increase, so does the happiness score.*
+
+*The second ggplot was created and examines the relationship between the GDP per capita and the score when grouped by categorical income. The plot shows that there is a lot of variation between the two variables which means it is possibly not correlated that well. On average, countries with lower income tend to have a lower happiness score and lower GDP per capita.*
+
+#### Dimensionality Reduction 
+
+```{r}
+library(cluster)
+# The number of clusters were determined. 
+data_cluster <- mergeddata %>% dplyr::select(Score, Income, healthylifeexpectancy, gdp)
+sil_width <- vector()
+for (i in 2:10) {
+  kms <- kmeans(data_cluster, centers = i)
+  silh <- silhouette(kms$cluster, dist(data_cluster))
+  sil_width[i] <- mean(silh[,3])
+}
+#A visualization of principal components is seen through the ggplot
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = "k", breaks = 1:10)
+
+# PAM was used to do a cluster analysis
+pam <- mergeddata %>% select(Score, Income, healthylifeexpectancy, gdp) %>% scale %>% pam(2)
+pam
+
+# Created the visualization of the cluster
+finalcluster <- mergeddata %>% select(Score, Income, healthylifeexpectancy, gdp) %>% mutate(cluster = pam$clustering)
+ggplot(finalcluster, aes(x = Score, y = Income, color = cluster)) + geom_point()
+
+```
+
+*The number of clusters were first determined using the silhouette function. A cluster analysis was ran by using the PAM function. There were a total number of two clusters, however these clusters were based on all the numeric variables. The following visualization of the cluster shows that the two variables possible correlation.*
+
+``````{r eval=F}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```

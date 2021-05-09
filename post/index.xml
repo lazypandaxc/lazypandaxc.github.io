@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Hang Dang</title>
+    <link>/post/</link>
+    <description>Recent content in Posts on Hang Dang</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Sun, 09 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>First Project Ever in R?</title>
+      <link>/post/2021/05/09/first-project-ever-in-r/</link>
+      <pubDate>Sun, 09 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2021/05/09/first-project-ever-in-r/</guid>
+      <description> Check out my first project I made in R! I used the World Happiness Data which is cool because I took a sociology class that is called, “Happiness, Health and Society!” I love you Professor Palmo. Link to project 1 </description>
+    </item>
+    
+  </channel>
+</rss>

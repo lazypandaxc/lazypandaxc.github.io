@@ -1,0 +1,12 @@
+---
+title: First Project Ever in R?
+author: 'Hang Dang'
+date: '2021-05-09'
+slug: first-project-ever-in-r
+categories: []
+tags: []
+description: ''
+---
+**Check out my first project I made in R! I used the World Happiness Data which is cool because I took a sociology class that is called, "Happiness, Health and Society!" I love you Professor Palmo.**
+[Link to project 1](/project/project1/)
+![](/post/2021-05-09-first-project-ever-in-r_files/hello.png)
